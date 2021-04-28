@@ -56,6 +56,10 @@
       "type": "boolean",
       "description": "Bundle empty cordova.js with build",
       "default": false
+    },
+    "dotenvConfigPath": {
+      "type": "string",
+      "description": "Path to Dotenv plugin configuration"
     }
   },
   "additionalProperties": false,

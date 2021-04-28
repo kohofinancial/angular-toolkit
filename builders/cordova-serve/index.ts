@@ -13,6 +13,7 @@ import type { IndexHtmlTransform } from '@angular-devkit/build-angular/src/utils
 import { ScriptsWebpackPlugin } from '@angular-devkit/build-angular/src/webpack/plugins';
 import type { json } from '@angular-devkit/core';
 import * as CopyWebpackPlugin from 'copy-webpack-plugin';
+import * as Dotenv from 'dotenv-webpack';
 import { basename } from 'path';
 import { from } from 'rxjs';
 import type { Observable } from 'rxjs';
@@ -33,7 +34,7 @@ export function serveCordova(
   options: CordovaServeBuilderSchema,
   context: BuilderContext,
 ): Observable<DevServerBuilderOutput> {
-  const { devServerTarget, port, host, ssl } = options;
+  const { devServerTarget, port, host, ssl, dotenvConfigPath } = options;
   const root = context.workspaceRoot;
   const devServerTargetSpec = targetFromTargetString(devServerTarget);
 
@@ -65,7 +66,7 @@ export function serveCordova(
       executeDevServerBuilder(
         formattedOptions,
         context,
-        getTransforms(formattedAssets, context),
+        getTransforms(formattedAssets, context, dotenvConfigPath),
       ),
     ),
   );
@@ -75,9 +76,14 @@ export default createBuilder<CordovaDevServerBuilderOptions, any>(serveCordova);
 function getTransforms(
   formattedAssets: FormattedAssets,
   context: BuilderContext,
+  dotenvConfigPath?: string,
 ) {
   return {
-    webpackConfiguration: cordovaServeTransform(formattedAssets, context),
+    webpackConfiguration: cordovaServeTransform(
+      formattedAssets,
+      context,
+      dotenvConfigPath,
+    ),
     indexHtml: indexHtmlTransformFactory(formattedAssets, context),
   };
 }
@@ -85,10 +91,12 @@ function getTransforms(
 const cordovaServeTransform: (
   formattedAssets: FormattedAssets,
   context: BuilderContext,
+  dotenvConfigPath?: string,
 ) => ExecutionTransformer<Configuration> = (
   formattedAssets,
   { workspaceRoot },
-) => browserWebpackConfig => {
+  dotenvConfigPath,
+) => async browserWebpackConfig => {
   const scriptExtras = formattedAssets.globalScriptsByBundleName.map(
     (script: { bundleName: any; paths: any }) => {
       const bundleName = script.bundleName;
@@ -111,6 +119,14 @@ const cordovaServeTransform: (
     ...scriptExtras,
     copyWebpackPluginInstance,
   );
+
+  if (dotenvConfigPath) {
+    const path = `${workspaceRoot}/${dotenvConfigPath}`;
+    const dotenvConfig = await import(path);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    browserWebpackConfig.plugins!.push(new Dotenv(dotenvConfig));
+  }
+
   return browserWebpackConfig;
 };
 
