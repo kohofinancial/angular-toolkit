@@ -1,3 +1,8 @@
+# [3.2.0](https://github.com/ionic-team/angular-toolkit/compare/v3.1.1...v3.2.0) (2021-04-29)
+
+### Features
+
+* **cordovaserve:** support option to use Dotenv plugin ([33b41fe](https://github.com/kohofinancial/angular-toolkit/commit/33b41fe7c6b8f43e3c9dc74f307305ad59d8591e))
 ## [3.1.1](https://github.com/ionic-team/angular-toolkit/compare/v3.1.0...v3.1.1) (2021-03-16)
 
 
