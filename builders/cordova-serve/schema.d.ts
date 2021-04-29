@@ -11,4 +11,5 @@ export interface CordovaServeBuilderSchema {
   cordovaMock?: boolean;
   consolelogs?: boolean;
   consolelogsPort?: number;
+  dotenvConfigPath?: string;
 }
